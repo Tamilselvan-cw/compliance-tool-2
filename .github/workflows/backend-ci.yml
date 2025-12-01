@@ -1,0 +1,44 @@
+name: Backend CI (dev-test & PR -> main-test)
+
+on:
+  push:
+    branches:
+      - dev-test
+  pull_request:
+    branches:
+      - main-test
+
+jobs:
+  backend-ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f backend/requirements.txt ]; then pip install -r backend/requirements.txt; else pip install -r requirements.txt; fi
+          pip install pytest bandit pip-audit ruff
+
+      - name: Lint (ruff)
+        run: |
+          # Adjust path if your code is not in backend/
+          ruff check backend || exit 0
+
+      - name: Run tests (pytest)
+        run: |
+          pytest backend/tests -q
+
+      - name: Security scan (bandit)
+        run: |
+          bandit -r backend -ll || exit 0
+
+      - name: Dependency audit (pip-audit)
+        run: |
+          pip-audit --progress spinner || exit 0
