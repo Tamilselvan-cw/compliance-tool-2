@@ -1,0 +1,160 @@
+# -------------------------
+# Node / React (Frontend)
+# -------------------------
+# dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# production build
+build/
+dist/
+.cache/
+.next/
+out/
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# editor directories and files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# coverage reports
+coverage/
+*.lcov
+
+# log files
+logs
+*.log
+npm-debug.log*
+
+# -------------------------
+# Python / FastAPI / Flask (Backend)
+# -------------------------
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Environments
+.env
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# PyCharm / VSCode
+.idea/
+.vscode/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# pyre type checker
+.pyre/
+
+# -------------------------
+# OS generated files
+# -------------------------
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+*.swp
+*.bak
+*.tmp
+*.orig
+*.log
+
+# -------------------------
+# Docker (if used)
+# -------------------------
+*.pid
+*.seed
+*.pid.lock
+docker-compose.override.yml
+.env.docker
+
+# -------------------------
+# Virtual environment or API cache
+# -------------------------
+__pypackages__/
+instance/
+*.db
+*.sqlite3
+
+# -------------------------
+# Local settings or secrets
+# -------------------------
+*.secret
+secrets.json
+config.json
+
+
+pyc 
+.pyc
+__pycache__/
+*.pyc
+
+
+.venv/
+venv/
+env/

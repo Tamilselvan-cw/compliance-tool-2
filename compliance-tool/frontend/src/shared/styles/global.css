@@ -1,0 +1,784 @@
+/* ======================================================================
+   Global CSS — Tailwind + MUI friendly (UPDATED for new dashboard look)
+   Import once in src/index.js:  import './global.css'
+   Font: Poppins (self-hosted) — place files under: /public/assets/fonts/
+   ====================================================================== */
+
+/* ---------------------------
+   0) Font faces (swap for perf)
+   --------------------------- */
+/* public/assets/fonts/Poppins-VariableFont_wght.woff2 */
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Poppins";
+  src: url("/assets/fonts/Poppins.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Put toasts on top of everything (safe high z-index) */
+.toast-viewport,
+.toast-root,
+#toast-container,
+[data-toast-root] {   /* add your toast lib selector(s) here */
+  z-index: 99999 !important;
+}
+
+/* If you use MUI Snackbar: raise its z-index too */
+.MuiSnackbar-root {
+  z-index: 99999 !important;
+}
+
+
+
+/* 2) Design tokens + font variable on :root */
+:root {
+  /* font stack variable — use the variable everywhere */
+  --font-family-sans: "Poppins", system-ui, -apple-system, "Segoe UI",
+                      Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji",
+                      "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  /* logo colors (extracted from Trelink_final.jpg) */
+  --logo-blue: #14719B;   /* brand blue */
+  --logo-green: #37AE81;  /* brand green */
+
+  /* page gradient using logo colors (left → right blue -> green -> white) */
+  --page-bg-gradient: linear-gradient(
+    90deg,
+    #ffffff 30%,
+    color-mix(in srgb, #ffffff 60%, var(--logo-blue) 40%) 30%,
+    var(--logo-blue) 20%,
+    var(--logo-green) 20%,
+  );
+
+  /* (keep your other variables below — shown here as an example) */
+  --color-primary: var(--logo-green);
+  --color-primary-600: #23b651;
+  --color-primary-300: #8ee2b3;
+  --color-primary-light: #eaf9ef;    /* subtle green wash */
+  --color-gradient-header: linear-gradient(135deg, #ebf8f4 0%, #e6f6f3 50%, #eaf6f8 100%);
+  --color-gradient-card: linear-gradient(180deg, rgba(43,182,115,0.12), rgba(43,182,115,0.04));
+  --color-bg: #eef7f4;               /* page background near pale green/blue */
+  --color-surface: rgba(255,255,255,0.85);
+  --color-surface-2: rgba(250, 253, 253, 0.75);
+  --color-border: rgba(35,182,81,0.12); /* subtle green stroke */
+  --color-text: #0f2430;             /* deep slate for primary text */
+  --color-text-2: #60707a;           /* muted slate */
+  --color-muted: #9aa3ad;
+  --color-grey-icon: #93A4B1;
+
+  /* Right sidebar / pale blue tones */
+  --color-right-bg: linear-gradient(180deg,#eef8fb 0%, #f5fbfd 100%);
+  --color-right-accent: #bfe9f4;
+
+  /* Dark hero/left panel */
+  --color-hero-bg: #051627;          /* deep navy teal */
+  --color-hero-grad: linear-gradient(180deg,#041726 0%, #072634 100%);
+  --color-hero-text: #ffffff;
+  --color-hero-sub: rgba(255,255,255,0.85);
+
+  /* State helpers (safe defaults for MUI/TW) */
+  --color-success: var(--color-primary);
+  --color-danger:  #ef4444;
+  --color-warning: #f59e0b;
+  --color-info:    #3b82f6;
+
+  --topbar-height: 72px;
+
+  /* Font sizes (12 → 48 px) */
+  --fs-12: 12px;
+  --fs-14: 14px;
+  --fs-16: 16px; /* base */
+  --fs-18: 18px;
+  --fs-20: 20px;
+  --fs-24: 24px;
+  --fs-28: 28px;
+  --fs-32: 32px;
+  --fs-36: 36px;
+  --fs-40: 40px;
+  --fs-44: 44px;
+  --fs-48: 48px;
+  --fs-28: 28px;
+  --fs-36: 36px;
+  --fs-44: 44px;
+
+  /* Weights (avoid "too bold") */
+  --fw-regular: 400;
+  --fw-medium:  500;
+  --fw-semi:    600;
+
+  /* Layout & rhythm */
+  --radius: 16px;        /* larger radii for modern look */
+  --radius-sm: 10px;
+  --shadow: 0 6px 18px rgba(9, 30, 40, 0.06), 0 2px 6px rgba(9,30,40,0.04);
+  --glass-shadow: 0 8px 30px rgba(8, 23, 33, 0.08);
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+}
+
+.main-with-fixed-topbar { 
+  padding-top: var(--topbar-height);
+}
+
+/* ------------------------------------
+   2) Base / document-level formatting
+   ------------------------------------ */
+html {
+  box-sizing: border-box;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color-scheme: light;
+}
+
+*, *::before, *::after { box-sizing: inherit; }
+
+body {
+  margin: 0;
+  font-family: var(--font-family-sans);
+  font-size: var(--fs-16);
+  line-height: 1.6;
+  color: var(--color-text);
+  /* new gradient background */
+  background: #fafafa;
+  background: linear-gradient(90deg,rgba(250, 250, 250, 1) 0%, rgba(255, 255, 255, 1) 10%, rgb(194, 250, 228) 70%, rgb(167, 199, 216) 100%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* { font-family: inherit; }
+
+/* App shell (top to bottom) */
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* page content area that sits below top navbar */
+.page-content {
+  padding-left: 12px;   /* inner padding for breathing room; set 0 if you want absolutely edge-to-edge */
+  padding-right: 12px;
+  padding-top: 18px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* Dashboard grid: left, center, right */
+.dashboard-grid {
+  width: 100%;
+  grid-template-columns: 360px 1fr 320px; /* keep your 3-column layout */
+  gap: 24px;
+  align-items: start;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  padding-left: 0;
+  padding-right: 0;
+  margin: 0;
+  width: 100%;
+}
+
+.top-navbar, .MuiAppBar-root {
+  width: 100%;
+  left: 0;
+  right: 0;
+  box-sizing: border-box;
+}
+
+/* Optional: tune left logo spacing so it sits slightly away from screen edge */
+.top-navbar .logo {
+  margin-left: 12px; /* adjust to taste */
+}
+
+.logo-color-button {
+  display: "inline-flex";
+                    align-items: "center";
+                    gap: 8;
+                    padding: "8px 12px";
+                    border-radius: 999;
+                    text-decoration: "none";
+                    width: "100%";
+                    max-width: "calc(100% - 44px)";
+                    color: "white";
+                    font-weight: 500;
+                    background: "linear-gradient(90deg, var(--logo-green) 0%, var(--logo-blue) 100%)";
+                    box-shadow: "0 6px 12px rgba(20,100,120,0.06), inset 0 -6px 12px rgba(255,255,255,0.02)";
+                    transition: "transform .12s ease, box-shadow .12s ease";
+                    font-size: "var(--fs-14)";
+}
+
+/* --------------------------
+   3) Typography scale & rules
+   -------------------------- */
+h1, h2, h3, h4, h5, h6 {
+  margin: 0 0 var(--space-4);
+  color: var(--color-text);
+  font-weight: var(--fw-semi);
+  line-height: 1.25;
+}
+h1 { font-size: var(--fs-48); font-weight: 700; }
+h2 { font-size: var(--fs-40); font-weight: 600; }
+h3 { font-size: var(--fs-32); font-weight: 600;}
+h4 { font-size: var(--fs-24);  font-weight: 600;}
+h5 { font-size: var(--fs-20);  font-weight: 600;}
+h6 { font-size: var(--fs-16);  font-weight: 600; }
+
+p, ul, ol, dl, blockquote, pre, table {
+  margin: 0 0 var(--space-4);
+}
+p, li, label, span, input, button, textarea {
+  font-size: var(--fs-16);
+  font-weight: var(--fw-regular);
+}
+
+small { font-size: var(--fs-14); color: var(--color-text-2); }
+.muted { color: var(--color-text-2); }
+
+/* Utility sizes (12 → 48) — handy with MUI/TW mix */
+.text-12 { font-size: var(--fs-12) !important; }
+.text-14 { font-size: var(--fs-14) !important; }
+.text-16 { font-size: var(--fs-16) !important; }
+.text-18 { font-size: var(--fs-18) !important; }
+.text-20 { font-size: var(--fs-20) !important; }
+.text-24 { font-size: var(--fs-24) !important; }
+.text-28 { font-size: var(--fs-28) !important; }
+.text-32 { font-size: var(--fs-32) !important; }
+.text-36 { font-size: var(--fs-36) !important; }
+.text-40 { font-size: var(--fs-40) !important; }
+.text-44 { font-size: var(--fs-44) !important; }
+.text-48 { font-size: var(--fs-48) !important; }
+
+/* Link styles (accessible focus, good contrast) */
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+a:hover { text-decoration: underline; }
+a:focus-visible {
+  outline: 3px solid color-mix(in oklab, var(--color-primary) 60%, white);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Selection */
+::selection {
+  background: color-mix(in oklab, var(--color-primary) 16%, white);
+  color: var(--color-text);
+}
+
+/* -----------------------------
+   4) Media & images (SEO/LH OK)
+   ----------------------------- */
+img, svg, video, canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+img { border-style: none; }
+
+/* -----------------------------
+   5) Forms / buttons (neutral)
+   ----------------------------- */
+  /* --------------------------
+   MUI input padding override
+   -------------------------- */
+/* keep compact input padding */
+.MuiOutlinedInput-input,
+.MuiSelect-select.MuiOutlinedInput-input {
+  padding: 8px 10px !important;
+  line-height: 1.45 !important;
+}
+
+/* realign the floating label for the new padding */
+.MuiInputLabel-root.MuiInputLabel-formControl {
+  /* default assumes ~16px pad; with 8px pad, move label down slightly */
+  transform: translate(14px, 10px) scale(1) !important;
+  transform-origin: top left !important;
+}
+
+.MuiInputLabel-root.MuiInputLabel-formControl.MuiInputLabel-shrink {
+  /* when focused/shrunk, lift a bit less so baseline looks centered */
+  transform: translate(14px, -8px) scale(0.75) !important;
+}
+
+/* -----------------------------------
+   MUI + native input placeholder size
+   ----------------------------------- */
+.MuiOutlinedInput-input::placeholder,
+input::placeholder,
+textarea::placeholder,
+.MuiInputBase-input::placeholder {
+  font-size: 10px !important;      /* smaller placeholder text */
+  line-height: 1.4 !important;
+  color: var(--color-text-2) !important;  /* muted color */
+  opacity: 0.8 !important;         /* subtle */
+}
+
+label { display: inline-block; margin-bottom: 6px; color: var(--color-text-2); }
+
+input, select, textarea {
+  font: inherit;
+  color: inherit;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  outline: none;
+}
+input::placeholder, textarea::placeholder { color: #9aa3b2; }
+input:focus, select:focus, textarea:focus {
+  border-color: color-mix(in oklab, var(--color-primary) 45%, #c7f0d9);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-primary) 18%, #ffffff);
+}
+
+/* Buttons: keep minimal so MUI styles win; nice defaults for plain <button> */
+button {
+  font: inherit;
+  color: #fff;
+  background: var(--color-primary);
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+button:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.6;
+  background: var(--color-disabled);
+  color: var(--color-text-2);
+}
+.theme-button {
+  /* brand gradient background (same as before) */
+  background: linear-gradient(90deg, #1d95cc 0%, #37AE81 100%) !important;
+
+  /* ensure text is white */
+  color: #ffffff !important;
+
+  /* box shadow and slightly stronger elevation for the active pill */
+  box-shadow: 0 6px 14px rgba(43,182,115,0.16) !important;
+
+  /* keep the pill rounded (Button sx already sets radius; keep for safety) */
+  border-radius: 999px !important;
+}
+
+/* hover stays same visual */
+.theme-button:hover {
+  background: linear-gradient(45deg, #37AE81 0%, #1d95cc 100%) !important;
+}
+
+/* glass card */
+/* Glassmorphism utility card */
+.glass-card {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px); /* Use hyphenated form for CSS */
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); /* Use hyphenated form for CSS */
+  margin-bottom: 10px !important;
+  border-radius: 10px !important;
+  padding: 15px !important;
+  overflow: hidden;
+  
+}
+
+/* inner wrapper around the canvas - must be transparent */
+.glass-chart {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px); /* Use hyphenated form for CSS */
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); /* Use hyphenated form for CSS */
+  margin-bottom: 10px !important;
+  border-radius: 10px !important;
+  padding: 15px !important;
+  overflow: hidden;
+  opacity: 0.8;
+}
+/* ensure no other .chart-card rules add a white background */
+.chart-card {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+/* -----------------------------
+   6) Cards & surfaces
+   ----------------------------- */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: var(--space-6);
+}
+
+/* glass / translucent card used heavily in the dashboard */
+.glass {
+  background: linear-gradient(180deg, rgba(255,255,255,0.78), rgba(255,255,255,0.60));
+  backdrop-filter: blur(6px) saturate(110%);
+  -webkit-backdrop-filter: blur(6px) saturate(110%);
+  border: 1px solid rgba(255,255,255,0.25);
+  box-shadow: var(--glass-shadow);
+  border-radius: var(--radius);
+}
+
+.metric-card {
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  display: inline-block;
+  color: var(--metric-color, #23b651);
+  letter-spacing: -0.01em;
+  will-change: transform, opacity;
+  animation: metric-appear 420ms cubic-bezier(.22,.9,.34,1) both;
+}
+
+/* plus sign styling to match the number */
+.metric-plus {
+  margin-left: 6px;
+  font-weight: 700;
+  font-size: inherit;
+  color: var(--metric-color, #23b651);
+}
+
+/* small pop + settle effect */
+@keyframes metric-appear {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-4px) scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+
+/* ------------------------------------
+   7) Tables (basic readability defaults)
+   ------------------------------------ */
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(0,0,0,0.04); }
+thead th { color: var(--color-text-2); font-weight: var(--fw-medium); }
+
+/* --------------------------------
+   8) Accessibility / motion / misc
+   -------------------------------- */
+:focus:not(:focus-visible) { outline: none; }
+:focus-visible { scroll-margin: 100px; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
+}
+
+/* Subtle scrollbars (WebKit); ignored elsewhere */
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-thumb {
+  background: #cbd5e1; border-radius: 999px; border: 2px solid #f1f5f9;
+}
+*::-webkit-scrollbar-track { background: #f8fafc; }
+
+/* --------------------------------
+   9) Helper color utilities (handy)
+   -------------------------------- */
+.text-primary { color: var(--color-primary) !important; }
+.bg-primary   { background: var(--color-primary) !important; }
+.text-muted   { color: var(--color-text-2) !important; }
+.border-subtle{ border-color: var(--color-border) !important; }
+.bg-surface   { background: var(--color-surface) !important; }
+
+/* -------------------------------------------------
+   10) MUI alignment (without fighting its theming)
+   ------------------------------------------------- */
+.MuiTypography-root { color: inherit; }
+.MuiPaper-rounded   { border-radius: var(--radius); }
+.MuiOutlinedInput-notchedOutline { border-color: var(--color-border); }
+
+/* --------------------------------
+   11) Dashboard-specific components
+   -------------------------------- */
+
+/* top nav / header background */
+.dashboard-header {
+  background: var(--color-gradient-header);
+  padding: 16px 24px;
+  border-radius: calc(var(--radius) * 1.2);
+  box-shadow: 0 6px 20px rgba(14, 38, 34, 0.04);
+}
+
+/* Hero/welcome (left) — dark panel */
+.hero-card {
+  background: var(--color-hero-grad);
+  color: var(--color-hero-text);
+  padding: 28px;
+  border-radius: var(--radius);
+  box-shadow: 0 10px 30px rgba(4, 22, 38, 0.45);
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  position: relative;
+  overflow: hidden;
+}
+.hero-card h1, .hero-card h2, .hero-card h3 {
+  color: var(--color-hero-text);
+}
+.hero-card .welcome-sub {
+  color: var(--color-hero-sub);
+  font-size: var(--fs-16);
+  line-height: 1.45;
+}
+
+/* Recently viewed list inside hero */
+.recently-viewed {
+  background: linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+  border-radius: 14px;
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+}
+.recent-item {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.recent-item .label {
+  background: linear-gradient(90deg, rgba(43,182,115,0.14), rgba(35,182,81,0.06));
+  color: white;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: var(--fs-14);
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+}
+.recent-item .external {
+  color: rgba(255,255,255,0.7);
+  font-size: 18px;
+}
+
+/* Metric cards (top) */
+.metrics-row {
+  display:flex;
+  gap: 16px;
+  align-items:stretch;
+}
+.metric-card {
+  flex:1;
+  padding: 18px;
+  border-radius: 14px;
+  background: var(--color-surface);
+  border: 1px solid rgba(16,24,40,0.04);
+  box-shadow: 0 6px 18px rgba(9, 30, 40, 0.04);
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.metric-card .metric-label { color: var(--color-text-2); font-size: var(--fs-14); }
+.metric-card .metric-value { font-size: var(--fs-32); color: var(--color-primary-600); font-weight:700; }
+
+/* Top chart container */
+.chart-card {
+  padding: 14px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.8));
+  border: 1px solid rgba(16,24,40,0.03);
+  box-shadow: 0 6px 18px rgba(9, 30, 40, 0.03);
+}
+
+/* Daily org activity (area chart) */
+.area-chart-card {
+  border-radius: 14px;
+  padding: 18px;
+  background: linear-gradient(180deg, rgba(235,247,243,0.7), rgba(250,255,255,0.6));
+  border: 1px solid rgba(16,24,40,0.03);
+}
+
+/* Coaches list (left bottom) */
+.coaches-list {
+  border-radius: 14px;
+  padding: 12px;
+  background: rgba(255,255,255,0.85);
+  border: 1px solid rgba(16,24,40,0.03);
+}
+.coach-row { display:flex; gap:12px; align-items:center; padding:8px 4px; border-radius:10px; }
+.coach-avatar { width:42px; height:42px; border-radius:50%; overflow:hidden; }
+.coach-meta { display:flex; flex-direction:column; gap:2px; }
+.coach-name { font-weight:600; color: var(--color-text); }
+.coach-email { font-size: 13px; color: var(--color-text-2); }
+
+/* Right sidebar (pale blue / profile & widgets) */
+.right-sidebar {
+  background: var(--color-right-bg);
+  border-radius: var(--radius);
+  padding: 18px;
+  border: 1px solid rgba(31, 143, 173, 0.06);
+  box-shadow: 0 6px 18px rgba(7, 20, 25, 0.04);
+  display:flex;
+  flex-direction:column;
+  gap: 14px;
+  min-width: 260px;
+}
+.profile-widget {
+  background: linear-gradient(180deg,#ffffff 0%, rgba(255,255,255,0.6) 100%);
+  border-radius: 12px;
+  padding: 14px;
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
+.profile-avatar { width:86px; height:160px; object-fit:contain; }
+
+/* clock/weather small widget */
+.clock-widget {
+  display:flex;
+  gap:12px;
+  align-items:center;
+  justify-content:space-between;
+}
+
+/* small pill actions used in the right column */
+.pill {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 12px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ffffff, rgba(255,255,255,0.9));
+  box-shadow: 0 6px 18px rgba(9, 30, 40, 0.04);
+}
+
+/* stats badges used next to profile (10+ users etc.) */
+.stats-badge {
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  font-weight:700;
+}
+.stats-badge .num { color: var(--color-primary-600); font-size: var(--fs-28); }
+.stats-badge .label { color: var(--color-text-2); font-size: var(--fs-14); }
+
+/* small utility for card header / settings icon to the right */
+.card-header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+}
+
+/* small rounded icon button */
+.icon-btn {
+  width:36px; height:36px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center;
+  background: rgba(255,255,255,0.6); border: 1px solid rgba(16,24,40,0.04);
+}
+Container{
+
+  width: 100%;
+  padding-left: var(--container-padding);
+  padding-right: var(--container-padding);
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+}
+
+/* metric mini indicators (up/down arrow + percent) */
+.metric-indicator {
+  display:inline-flex;
+  gap:6px;
+  align-items:center;
+  color: var(--color-text-2);
+  font-size: 13px;
+}
+
+/* small settings/gear icon position inside charts */
+.chart-gear {
+  opacity: .9;
+}
+
+/* Responsive grid for dashboard content */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 520px; /* main + right sidebar */
+  gap: 18px;
+  align-items: start;
+}
+@media (max-width: 1100px) {
+  .dashboard-grid { grid-template-columns: 1fr; }
+}
+
+/* --------------------------------
+   12) Print (reduce ink, keep spacing)
+   -------------------------------- */
+@media print {
+  body { background: #fff; color: #000; }
+  a { text-decoration: underline; }
+  .no-print { display: none !important; }
+}
+
+/* Responsive font token overrides (mobile / tablet) */
+@media (max-width: 991px) {
+  :root {
+    /* reduce the biggest sizes (desktop → tablet/phone) */
+    --fs-48: 34px;
+    --fs-44: 32px;
+    --fs-40: 30px;
+    --fs-36: 28px;
+    --fs-32: 24px;
+    --fs-28: 20px;
+    --fs-24: 18px;
+    --fs-20: 16px;
+    --fs-18: 15px;
+    --fs-16: 15px;
+    --fs-14: 13px;
+    --fs-12: 11px;
+  }
+}
+
+@media (max-width: 599px) {
+  :root {
+    --fs-44: 28px;  /* make large tokens equal to small one on tiny screens */
+    --fs-36: 28px;
+    --fs-32: 28px;
+    /* optionally --fs-20 etc */
+  }
+}
+
+/* Extra-small phones — compress more aggressively */
+@media (max-width: 480px) {
+  :root {
+    --fs-48: 30px;
+    --fs-44: 28px;
+    --fs-40: 26px;
+    --fs-36: 24px;
+    --fs-32: 20px;
+    --fs-28: 18px;
+    --fs-24: 16px;
+    --fs-20: 15px;
+    --fs-18: 14px;
+    --fs-16: 14px;
+    --fs-14: 12px;
+    --fs-12: 11px;
+  }
+}
+
