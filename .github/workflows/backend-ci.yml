@@ -20,19 +20,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up QEMU (for buildx)
+      - name: Set up QEMU (for buildx, optional)
         uses: docker/setup-qemu-action@v2
 
-      - name: Set up Buildx
+      - name: Set up Buildx (optional)
         uses: docker/setup-buildx-action@v2
-
-      - name: Cache Docker buildx layers
-        uses: actions/cache@v4
-        with:
-          path: /tmp/.buildx-cache
-          key: buildx-cache-${{ github.ref }}-${{ github.sha }}
-          restore-keys: |
-            buildx-cache-${{ github.ref }}-
 
       - name: Cache npm
         uses: actions/cache@v4
@@ -44,13 +36,7 @@ jobs:
 
       - name: Build Docker image (backend context)
         run: |
-          docker build \
-            --progress=plain \
-            --cache-from=type=local,src=/tmp/.buildx-cache \
-            --cache-to=type=local,dest=/tmp/.buildx-cache-new \
-            -t backend-ci -f backend/Dockerfile backend
-          rm -rf /tmp/.buildx-cache || true
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache || true
+          docker build -t backend-ci -f backend/Dockerfile backend
 
       - name: Run tests inside container
         run: docker run --rm backend-ci
@@ -61,4 +47,4 @@ jobs:
         with:
           name: docker-build-logs
           path: |
-            /tmp/.buildx-cache
+            ./logs || true
