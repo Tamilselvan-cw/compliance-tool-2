@@ -23,21 +23,20 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ -f backend/requirements.txt ]; then pip install -r backend/requirements.txt; else pip install -r requirements.txt; fi
+          pip install -r compliance_tool/backend/requirements.txt
           pip install pytest bandit pip-audit ruff
 
       - name: Lint (ruff)
         run: |
-          # Adjust path if your code is not in backend/
-          ruff check backend || exit 0
+          ruff check compliance_tool/backend || exit 0
 
       - name: Run tests (pytest)
         run: |
-          pytest backend/tests -q
+          pytest compliance_tool/backend/tests -q
 
       - name: Security scan (bandit)
         run: |
-          bandit -r backend -ll || exit 0
+          bandit -r compliance_tool/backend -ll || exit 0
 
       - name: Dependency audit (pip-audit)
         run: |
