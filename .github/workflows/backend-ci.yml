@@ -1,43 +1,64 @@
-name: Backend CI (dev-test & PR -> main-test)
+name: Docker CI (backend)
 
 on:
   push:
-    branches:
-      - dev-test
+    branches: [ "dev-test", "main-test", "main" ]
   pull_request:
-    branches:
-      - main-test
+    branches: [ "dev-test", "main-test", "main" ]
+
+permissions:
+  contents: read
 
 jobs:
-  backend-ci:
+  build-and-test:
     runs-on: ubuntu-latest
+    env:
+      CI: "true"
+      NODE_ENV: "test"
+
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Set up QEMU (for buildx)
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Cache Docker buildx layers
+        uses: actions/cache@v4
         with:
-          python-version: '3.10'
+          path: /tmp/.buildx-cache
+          key: buildx-cache-${{ github.ref }}-${{ github.sha }}
+          restore-keys: |
+            buildx-cache-${{ github.ref }}-
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r compliance_tool/backend/requirements.txt
-          pip install pytest bandit pip-audit ruff
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-cache-${{ runner.os }}-lockfile-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            npm-cache-${{ runner.os }}-
 
-      - name: Lint (ruff)
+      - name: Build Docker image (backend context)
         run: |
-          ruff check compliance_tool/backend || exit 0
+          docker build \
+            --progress=plain \
+            --cache-from=type=local,src=/tmp/.buildx-cache \
+            --cache-to=type=local,dest=/tmp/.buildx-cache-new \
+            -t backend-ci -f backend/Dockerfile backend
+          rm -rf /tmp/.buildx-cache || true
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache || true
 
-      - name: Run tests (pytest)
-        run: |
-          pytest compliance_tool/backend/tests -q
+      - name: Run tests inside container
+        run: docker run --rm backend-ci
 
-      - name: Security scan (bandit)
-        run: |
-          bandit -r compliance_tool/backend -ll || exit 0
-
-      - name: Dependency audit (pip-audit)
-        run: |
-          pip-audit --progress spinner || exit 0
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-build-logs
+          path: |
+            /tmp/.buildx-cache
