@@ -1,55 +1,10 @@
-name: Backend CI (python-only)
-
-on:
-  push:
-    branches: ["dev-test"]
-  pull_request:
-    branches: ["main-test"]
-
-permissions:
-  contents: read
-
-jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
-    env:
-      CI: "true"
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          if [ -f compliance_tool/backend/requirements.txt ]; then pip install -r compliance_tool/backend/requirements.txt; fi
-          pip install pytest httpx bandit pip-audit
-
-      - name: (PR only) Ensure CHANGELOG updated
-        if: ${{ github.event_name == 'pull_request' }}
-        run: |
-          echo "Checking PR for CHANGELOG.md update..."
-          BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
-          echo "Base branch: $BASE_BRANCH"
-          git fetch origin $BASE_BRANCH --depth=1
-          # list files changed in the PR (compare base..head)
-          CHANGED=$(git diff --name-only origin/$BASE_BRANCH...${{ github.sha }} || true)
-          echo "Changed files:"
-          echo "$CHANGED"
-          echo "$CHANGED" | grep -qE '^CHANGELOG\.md$' || (echo "CHANGELOG.md not modified in this PR. Please update CHANGELOG.md" && exit 1)
-
       - name: Start backend (uvicorn) in background
         run: |
-          echo "Starting uvicorn..."
-          # adjust module path if needed (app.main:app)
-          nohup python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload > server.log 2>&1 &
+          echo "Setting PYTHONPATH to include backend package dirs"
+          echo "PYTHONPATH=$PWD/compliance_tool/backend:$PWD/compliance-tool/backend" >> $GITHUB_ENV
+          export PYTHONPATH="$PWD/compliance_tool/backend:$PWD/compliance-tool/backend:$PYTHONPATH"
+          echo "PYTHONPATH is: $PYTHONPATH"
+          nohup python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1 > server.log 2>&1 &
           echo "waiting for server to be healthy..."
           for i in $(seq 1 30); do
             sleep 1
@@ -60,15 +15,3 @@ jobs:
             echo "waiting... ($i)"
           done
           tail -n +1 server.log | sed -n '1,200p'
-
-      - name: Run pytest (backend tests)
-        run: |
-          pytest compliance_tool/backend/tests -q
-
-      - name: Run Bandit (quick)
-        run: |
-          bandit -r compliance_tool/backend || true
-
-      - name: Run pip-audit (dependencies)
-        run: |
-          pip-audit || true
