@@ -1,17 +1,53 @@
-      - name: Start backend (uvicorn) in background
+name: Backend CI (pytest in-process)
+
+on:
+  push:
+    branches: ["dev-test"]
+  pull_request:
+    branches: ["main-test"]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    env:
+      CI: "true"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
         run: |
-          echo "Setting PYTHONPATH to include backend package dirs"
-          echo "PYTHONPATH=$PWD/compliance_tool/backend:$PWD/compliance-tool/backend" >> $GITHUB_ENV
-          export PYTHONPATH="$PWD/compliance_tool/backend:$PWD/compliance-tool/backend:$PYTHONPATH"
-          echo "PYTHONPATH is: $PYTHONPATH"
-          nohup python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1 > server.log 2>&1 &
-          echo "waiting for server to be healthy..."
-          for i in $(seq 1 30); do
-            sleep 1
-            if curl -sS --max-time 2 http://127.0.0.1:8000/ >/dev/null; then
-              echo "server is up"
-              break
-            fi
-            echo "waiting... ($i)"
-          done
-          tail -n +1 server.log | sed -n '1,200p'
+          python -m pip install --upgrade pip
+          if [ -f compliance_tool/backend/requirements.txt ]; then pip install -r compliance_tool/backend/requirements.txt; fi
+          pip install pytest httpx fastapi[all]  # installs TestClient + httpx
+
+      - name: (PR only) Ensure CHANGELOG updated
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
+          git fetch origin $BASE_BRANCH --depth=1
+          CHANGED=$(git diff --name-only origin/$BASE_BRANCH...${{ github.sha }} || true)
+          echo "$CHANGED" | grep -qE '^CHANGELOG\.md$' || (echo "CHANGELOG.md not modified in this PR. Please update CHANGELOG.md" && exit 1)
+
+      - name: Run pytest (backend tests)
+        run: |
+          pytest compliance_tool/backend/tests -q
+
+      - name: Run Bandit (quick)
+        run: |
+          bandit -r compliance_tool/backend || true
+
+      - name: Run pip-audit (dependencies)
+        run: |
+          pip-audit || true
