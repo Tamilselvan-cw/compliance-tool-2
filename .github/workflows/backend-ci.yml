@@ -1,10 +1,10 @@
-name: Docker CI (backend)
+name: Backend CI (python-only)
 
 on:
   push:
-    branches: [ "dev-test", "main-test", "main" ]
+    branches: ["dev-test"]
   pull_request:
-    branches: [ "dev-test", "main-test", "main" ]
+    branches: ["main-test"]
 
 permissions:
   contents: read
@@ -14,37 +14,61 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CI: "true"
-      NODE_ENV: "test"
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Set up QEMU (for buildx, optional)
-        uses: docker/setup-qemu-action@v2
-
-      - name: Set up Buildx (optional)
-        uses: docker/setup-buildx-action@v2
-
-      - name: Cache npm
-        uses: actions/cache@v4
         with:
-          path: ~/.npm
-          key: npm-cache-${{ runner.os }}-lockfile-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            npm-cache-${{ runner.os }}-
+          fetch-depth: 0
 
-      - name: Build Docker image (backend context)
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
         run: |
-          docker build -t backend-ci -f backend/Dockerfile backend
+          python -m pip install --upgrade pip
+          if [ -f compliance_tool/backend/requirements.txt ]; then pip install -r compliance_tool/backend/requirements.txt; fi
+          pip install pytest httpx bandit pip-audit
 
-      - name: Run tests inside container
-        run: docker run --rm backend-ci
+      - name: (PR only) Ensure CHANGELOG updated
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          echo "Checking PR for CHANGELOG.md update..."
+          BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
+          echo "Base branch: $BASE_BRANCH"
+          git fetch origin $BASE_BRANCH --depth=1
+          # list files changed in the PR (compare base..head)
+          CHANGED=$(git diff --name-only origin/$BASE_BRANCH...${{ github.sha }} || true)
+          echo "Changed files:"
+          echo "$CHANGED"
+          echo "$CHANGED" | grep -qE '^CHANGELOG\.md$' || (echo "CHANGELOG.md not modified in this PR. Please update CHANGELOG.md" && exit 1)
 
-      - name: Upload logs on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: docker-build-logs
-          path: |
-            ./logs || true
+      - name: Start backend (uvicorn) in background
+        run: |
+          echo "Starting uvicorn..."
+          # adjust module path if needed (app.main:app)
+          nohup python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload > server.log 2>&1 &
+          echo "waiting for server to be healthy..."
+          for i in $(seq 1 30); do
+            sleep 1
+            if curl -sS --max-time 2 http://127.0.0.1:8000/ >/dev/null; then
+              echo "server is up"
+              break
+            fi
+            echo "waiting... ($i)"
+          done
+          tail -n +1 server.log | sed -n '1,200p'
+
+      - name: Run pytest (backend tests)
+        run: |
+          pytest compliance_tool/backend/tests -q
+
+      - name: Run Bandit (quick)
+        run: |
+          bandit -r compliance_tool/backend || true
+
+      - name: Run pip-audit (dependencies)
+        run: |
+          pip-audit || true
