@@ -42,7 +42,7 @@ jobs:
 
       - name: Run pytest (backend tests)
         run: |
-          pytest compliance_tool/backend/tests -q
+          pytest backend/tests -q
 
       - name: Run Bandit (quick)
         run: |
